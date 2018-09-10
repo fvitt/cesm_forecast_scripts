@@ -1,0 +1,49 @@
+#!/bin/bash -l
+#
+#SBATCH -J xfer_plot_files
+#SBATCH -o xfer_plot_files.out.%J
+#SBATCH -e xfer_plot_files.out.%J
+#SBATCH -C caldera
+#SBATCH --account=P19010000
+#SBATCH -N 1
+#SBATCH -t 00:50:00
+#SBATCH -p dav
+
+date
+
+module purge
+module load ncarenv
+module load python
+module list
+
+
+cd /glade/u/home/fvitt/cesm_forecast_scripts
+
+today=`date +%Y%m%d`
+
+plots_dir=/glade/scratch/fvitt/GEOS5_frcst_data/$today/plots
+file=$plots_dir/.ready_for_xfer
+
+echo "check for file: $file ..."
+
+if [ -f $file ] 
+then
+  echo "Transfer plot files from $plots_dir..."
+  logid=`date +%Y%m%d-%H%M%S`
+  echo "./export_data.py &> /glade/scratch/fvitt/GEOS5_frcst_data/xfer_plot_files.log.$logid"
+  ./export_data.py &> /glade/scratch/fvitt/GEOS5_frcst_data/xfer_plot_files.log.$logid
+
+  echo "Transfer done. Resubmit for tomorrow..."
+  echo "sbatch --begin=14:00:00 xfer_plot_files_batch"
+  sbatch --begin=14:00:00 xfer_plot_files_batch
+else
+  echo "Error: File $file does NOT exists.  Try later..."
+  hour=`date +%H`
+  nexthr=$(expr $hour + 1)
+  echo "sbatch --begin=$nexthr:00:00 xfer_plot_files_batch"
+  sbatch --begin=$nexthr:00:00 xfer_plot_files_batch
+fi
+
+date
+
+exit 0

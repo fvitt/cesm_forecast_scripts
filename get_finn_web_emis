@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+#module load idl
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -d|--date)
+    fdate="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -i|--idlpath)
+    ipath="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -e|--emispath)
+    epath="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+path_FINN="${epath}/FINNnrt/${fdate}/"
+
+mkdir -p $path_FINN
+
+#wget -r -nd -l1 -A'.nc' https://www.acom.ucar.edu/acresp/MODELING/finn_emis_nc/${fdate}/ -P ${path_FINN}
+## || echo "emis download failed" && exit 1
+
+scp modeling2.acom.ucar.edu:/amadeus-data/emmons/web/finn_emis_nc/${fdate}/*nc $path_FINN
+
+cd ${ipath}
+
+path_EMIS="${epath}/forecast/"
+
+idl << EOF
+     .r update_fire_emis_fcst.pro
+     firepath = "${path_FINN}"
+     frcstpath = "${path_EMIS}"
+     help, firepath, frcstpath
+     update_fire_emis_fcst, ${fdate}, firepath, frcstpath
+     exit
+EOF
+
+exit 0

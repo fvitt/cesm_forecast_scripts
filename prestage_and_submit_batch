@@ -1,0 +1,63 @@
+#!/bin/bash -l
+#
+
+#PBS -A P19010000
+#PBS -N prestage_and_submit
+#PBS -j oe
+#PBS -q share
+#PBS -l walltime=02:00:00
+#PBS -l select=1:ncpus=4
+
+### Send email on abort, begin and end
+##PBS -m abe
+#PBS -m a
+#PBS -M fvitt@ucar.edu
+
+source /glade/u/apps/ch/opt/Lmod/7.3.14/lmod/7.3.14/init/bash
+
+module purge
+module list
+module load ncarenv
+module load intel
+module load python
+module load ncl
+module load idl
+module list
+
+echo "Begin Prestage and Submit Job"
+
+date
+
+cd /glade/u/home/fvitt/cesm_forecast_scripts
+
+# --- Determine time-stamp/file-ID string ---
+export LID="`date +%Y%m%d-%H%M%S`"
+
+today=`date +%Y%m%d`
+file=/glade/scratch/fvitt/GEOS5_frcst_data/.last_fcst_met_$today
+
+if [ -f $file ] 
+then
+  echo "File $file does exist.  Begin prestage..."
+
+  ./prestage_and_submit_run.py >& /glade/scratch/fvitt/GEOS5_frcst_data/prestage_and_submit_run.log.$LID
+
+  # resubmit to run 8 am tomorrow ...
+  echo "qsub -a 0800 prestage_and_submit_batch"
+  qsub -a 0800 prestage_and_submit_batch
+
+else
+
+  echo "Error: File $file does NOT exist.  Try next hour..."
+  hour=`date +%H`
+  nexthr=$(expr $hour + 1)
+  echo "qsub -a ${nexthr}00 prestage_and_submit_batch"
+  qsub -a ${nexthr}00 prestage_and_submit_batch
+fi
+  
+
+date
+
+echo "End Prestage and Submit Job"
+
+exit 0

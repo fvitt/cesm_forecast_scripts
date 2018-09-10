@@ -1,0 +1,61 @@
+#!/bin/bash -l
+#
+# submit to slurm batch queue to run on DAV
+#> module load slurm
+#> sbatch batch_script
+#> squeue -u $USER
+#> scancel <ID> 
+#
+#SBATCH -J frcst_dwnld_regrid
+#SBATCH -n 8
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=8
+#SBATCH -t 04:00:00
+#SBATCH -p dav
+#SBATCH -C caldera|pronghorn
+#SBATCH -o dwnld_proc_frcst.out.%J
+#SBATCH -e dwnld_proc_frcst.out.%J
+#SBATCH --account=P19010000
+#SBATCH --mem 50G
+
+#module purge
+module list
+module load python
+module load slurm
+module load ncarenv
+module load idl
+module list
+
+ncar_pylib
+
+date
+echo "Begin download and regrid Job"
+
+cd /glade/u/home/fvitt/cesm_forecast_scripts
+
+## --- Determine time-stamp/file-ID string ---
+
+export LID="`date +%Y%m%d-%H%M%S`"
+
+./download_and_regrid.py >& /glade/scratch/fvitt/GEOS5_frcst_data/download_and_regrid.log.$LID
+
+today=`date +%Y%m%d`
+file=/glade/scratch/fvitt/GEOS5_frcst_data/.last_fcst_met_$today
+
+if [ -f $file ] 
+then
+  echo "Download and regrid job successful"
+
+  echo "sbatch --begin=06:00:00 download_and_regrid_batch"
+  sbatch --begin=06:00:00 download_and_regrid_batch
+else
+  echo "Error: File $file does NOT exist.  Try next hour..."
+  hour=`date +%H`
+  nexthr=$(expr $hour + 1)
+  echo "sbatch --begin=$nexthr:00:00 download_and_regrid_batch"
+  sbatch --begin=$nexthr:00:00 download_and_regrid_batch
+fi
+  
+date
+
+exit 0

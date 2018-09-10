@@ -1,0 +1,42 @@
+#!/bin/tcsh
+#
+
+#PBS -A P19010000
+#PBS -N postproc_frcst
+#PBS -j oe
+#PBS -q share
+#PBS -l walltime=00:10:00
+#PBS -l select=1:ncpus=4
+
+### Send email on abort, begin and end
+##PBS -m abe
+#PBS -m a
+#PBS -M fvitt@ucar.edu
+
+source /glade/u/apps/ch/opt/Lmod/7.3.14/lmod/7.3.14/init/tcsh 
+
+module purge
+module list
+module load slurm
+module load ncarenv
+module load intel
+module load python
+module load ncl
+module list
+
+echo "Begin Post-Processing Job"
+
+date
+
+cd /glade/u/home/fvitt/cesm_forecast_scripts
+
+# --- Determine time-stamp/file-ID string ---
+setenv LID "`date +%Y%m%d-%H%M%S`"
+
+echo "sbatch ./postprocess_batch.slurm"
+sbatch ./postprocess_batch.slurm
+#./postprocess_cesm_outputs.py >& /glade/scratch/fvitt/GEOS5_frcst_data/postprocess.log.$LID
+
+echo "End Post-Processing Job"
+date
+exit 0

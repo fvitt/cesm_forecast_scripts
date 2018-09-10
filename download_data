@@ -1,0 +1,148 @@
+#!/bin/csh
+
+echo "BEGIN DOWNLOAD"
+
+set argnum = 0
+
+set ftpuser = "gmao_ops"
+set password = ""
+set server = ftp.nccs.nasa.gov
+
+set base_filename = "GEOS.fp.asm"
+set remote_basedir = "/fp/das"
+
+set ftpuser = "gmao_ops"
+set password = ""
+set server = ftp.nccs.nasa.gov
+
+set file_tot = 80
+set loop_lim = 12
+set sleep_dt = 600
+
+#ftp://gmao_ops@ftp.nccs.nasa.gov/fp/das/Y2013/M11/D18/GEOS.fp.asm.inst1_2d_smp_Nx.20131118_1900.V01.nc4
+
+#set year = "unset"
+
+foreach arg ($argv)
+  @ argnum++
+  @ argnump = $argnum + 1
+  switch ($arg)
+   case "-year":
+     set year = "$argv[$argnump]"; breaksw
+   case "-month":
+     set month = "$argv[$argnump]"; breaksw
+   case "-day":
+     set day = "$argv[$argnump]"; breaksw
+   case "-hour":
+     set hour = "$argv[$argnump]"; breaksw
+   case "-forecast_hour":
+     set forecast_hour = "$argv[$argnump]"; breaksw
+   case "-forecast_date":
+     set forecast_date = "$argv[$argnump]"; breaksw
+   case "-remote_basedir":
+     set remote_basedir = "$argv[$argnump]"; breaksw
+   case "-local_dir":
+     set local_dir = "$argv[$argnump]"; breaksw
+   case "-base_filename":
+     set base_filename = "$argv[$argnump]"; breaksw
+   case "-file_tot":
+     set file_tot = "$argv[$argnump]"; breaksw
+   case "-loop_lim":
+     set loop_lim = "$argv[$argnump]"; breaksw
+   case "-sleep_dt":
+     set sleep_dt = "$argv[$argnump]"; breaksw
+  endsw
+
+end
+
+set yyyymmdd_date = ${year}${month}${day}
+
+set remote_dir = "${remote_basedir}/Y${year}/M${month}/D${day}"
+if (${?hour}) then
+  set remote_dir = "${remote_dir}/H${hour}"
+  #set local_dir = "${local_dir}/H${hour}"
+endif
+
+
+set set_cmds = "set ftp:list-empty-ok true; set cmd:fail-exit true; set net:max-retries 5"
+set lftp_opts = "${set_cmds}; open -u $ftpuser,$password $server; mirror -c -r -p --parallel=4 --no-symlinks -L --verbose=1 -I "
+set loop_cnt = 0
+
+#echo "mkdir -p $local_dir"
+#mkdir -p $local_dir
+
+while ( $loop_cnt < $loop_lim )
+    echo "loop_cnt = $loop_cnt"
+    date
+
+    set glob = "${base_filename}.inst3_3d_asm_Nv."
+    if (${?hour}) then
+      set glob = "${glob}*_${hour}+"
+    endif
+    if (${?forecast_date}) then
+      set glob = "${glob}*${forecast_date}"
+    endif
+    set glob = "${glob}*.nc4"
+
+    echo "/usr/bin/lftp -c $lftp_opts $glob $remote_dir $local_dir"
+    /usr/bin/lftp -c "$lftp_opts $glob $remote_dir $local_dir"
+
+    set glob = "${base_filename}.tavg1_2d_flx_Nx"
+    if (${?hour}) then
+      set glob = "${glob}*_${hour}+"
+    endif
+    if (${?forecast_date}) then
+      set glob = "${glob}*${forecast_date}"
+    endif
+    set glob = "${glob}*.nc4"
+    echo "lftp -c $lftp_opts $glob $remote_dir $local_dir"
+    lftp -c "$lftp_opts $glob $remote_dir $local_dir"
+
+    set glob = "${base_filename}.tavg1_2d_lnd_Nx"
+    if (${?hour}) then
+      set glob = "${glob}*_${hour}+"
+    endif
+    if (${?forecast_date}) then
+      set glob = "${glob}*${forecast_date}"
+    endif
+    set glob = "${glob}*.nc4"
+    echo "lftp -c $lftp_opts $glob $remote_dir $local_dir"
+    lftp -c "$lftp_opts $glob $remote_dir $local_dir"
+
+    set glob = "${base_filename}.tavg1_2d_rad_Nx"
+    if (${?hour}) then
+      set glob = "${glob}*_${hour}+"
+    endif
+    if (${?forecast_date}) then
+      set glob = "${glob}*${forecast_date}"
+    endif
+    set glob = "${glob}*.nc4"
+    echo "lftp -c $lftp_opts $glob $remote_dir $local_dir"
+    lftp -c "$lftp_opts $glob $remote_dir $local_dir"
+
+    date
+
+    set glob = "${base_filename}."
+    if (${?hour}) then
+      set glob = "${glob}*_${hour}+"
+    endif
+    if (${?forecast_date}) then
+      set glob = "${glob}*${forecast_date}"
+    endif
+    set glob = "${glob}*.nc4"
+    set xfer_file_cnt = `ls $local_dir/${glob} | wc -l`
+    echo " number of files downloaded: ${xfer_file_cnt} "
+    if( $xfer_file_cnt == $file_tot ) then
+      echo "DOWNLOAD SUCCESSFUL"
+      exit 0
+    endif
+    @ loop_cnt++
+    if ( $loop_cnt < $loop_lim ) then
+      echo "loop_cnt: $loop_cnt loop_lim: $loop_lim ... now sleep for $sleep_dt seconds ... "
+      sleep $sleep_dt
+    endif
+end
+
+echo "DOWNLOAD FAILED $loop_cnt $loop_lim "
+exit -1
+

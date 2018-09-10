@@ -1,0 +1,43 @@
+#!/bin/bash -l
+#
+#SBATCH -J xfer_history_files
+#SBATCH -o xfer_history_files.out.%J
+#SBATCH -e xfer_history_files.out.%J
+#SBATCH -C caldera
+#SBATCH --account=P19010000
+#SBATCH -N 1
+#SBATCH -t 00:50:00
+#SBATCH -p dav
+
+date
+
+cd /glade/u/home/fvitt/cesm_forecast_scripts
+
+today=`date +%Y%m%d`
+
+hist_dir=/glade/scratch/fvitt/GEOS5_frcst_data/$today/model_files
+file=$hist_dir/.ready_for_xfer
+
+echo "check for file: $file ..."
+
+if [ -f $file ] 
+then
+  echo "Transfer history files from $hist_dir..."
+  echo "scp $hist_dir/*.cam.h[03].*.nc modeling2.acom.ucar.edu:/waccm-output/"
+  logid=`date +%Y%m%d-%H%M%S`
+  scp $hist_dir/*.cam.h[03].*.nc modeling2.acom.ucar.edu:/waccm-output/ &> /glade/scratch/fvitt/GEOS5_frcst_data/xfer_history_files.log.$logid
+
+  echo "Transfer done. Resubmit for tomorrow..."
+  echo "sbatch --begin=09:00:00 xfer_history_files_batch"
+  sbatch --begin=09:00:00 xfer_history_files_batch
+else
+  echo "Error: File $file does NOT exist.  Try later..."
+  hour=`date +%H`
+  nexthr=$(expr $hour + 1)
+  echo "sbatch --begin=$nexthr:00:00 xfer_history_files_batch"
+  sbatch --begin=$nexthr:00:00 xfer_history_files_batch
+fi
+
+date
+
+exit 0
