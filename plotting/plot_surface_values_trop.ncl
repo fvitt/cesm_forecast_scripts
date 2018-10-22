@@ -1,15 +1,18 @@
 ;load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 ;load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 ;load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
+;load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
+
+
 
 begin
  print("Begin NCL plotting script")
 
 ; update to the right date
 ; get from script
-; dir_output = "/glade/scratch/fvitt/GEOS5_frcst_data/20180302/model_files/"
-; case_name = "f.e20.FWSD.f09_f09_mg17.forecast.008.ch"
-; dir_plot =  "/glade/scratch/tilmes/GEOS5_frcst_data/20180302/plots/"
+; dir_output = "/glade/scratch/fvitt/GEOS5_frcst_data/20181005/model_files/"
+; case_name = "f.e21.FWSD.f09_f09_mg17.forecast.001"
+; dir_plot =  "/glade/scratch/tilmes/GEOS5_frcst_data/20181005/plots/"
 ; dir_plot =  "/glade/scratch/tilmes/GEOS5_frcst_data/20171203/plots/"
 ; dir_plot =  "/glade/scratch/mmills/GEOS5_frcst_data/20171203/"
 ;;;;;;;;;;;;;;;;
@@ -38,13 +41,13 @@ begin
  srf_n(nSurfaces-3:nSurfaces-1) = (/"Total Column","Trop. Column", "Strat. Column"/)
  srf_m(nSurfaces-3:nSurfaces-1) = (/"TotalColumn","TropColumn", "StratColumn"/)
 
- spec            = (/      "O3","CO",      "NOX", "EXTINCTdn","SO2",            "CLOX",      "SO4","BC","DUST",  "SSALT","CO01","CO02","CO03","CO04","CO05","CO06","CO07","CO08","CO09"/)
- spec_n          = (/"O~B~3~N~","CO","NO~B~x~N~","Extinction","SO~B~2~N~","ClO~B~x~N~","SO~B~4~N~","BC","Dust","Seasalt","CO_biomass","CO_NAm","CO_EU","CO_NAf","CO_WAs","CO_EAs","CO_SAm","CO_SAf","CO_Aus"/)
- spec_col        = (/        "",  "",         "",  "AODVISdn","",                   "",         "",  "",    "",       "","","","","","","","","",""/)
- spec_stratcol   = (/        "",  "",         "","AODVISstdn","",                   "",         "",  "",    "",       "","","","","","","","","",""/)
- spec_n_col      = (/"O~B~3~N~","CO","NO~B~x~N~",       "AOD","",                   "",         "",  "",    "",       "","","","","","","","","",""/)
- specLogContours = (/False, False, False, True, False, False, True, True, True, True,False, False, False,False, False, False,False, False, False/)
- spec_comb = (/False, False, True, False, False, False, True, True, True, True,False, False, False,False, False, False,False, False, False/)
+ spec            = (/      "O3","CO",      "NOX", "EXTINCTdn","SO2",            "CLOX",      "SO4","BC","DUST",  "SSALT","CO01","CO02","CO03","CO04","CO05","CO06","CO07","CO08","CO09","PM25_SRF"/)
+ spec_n          = (/"O~B~3~N~","CO","NO~B~x~N~","Extinction","SO~B~2~N~","ClO~B~x~N~","SO~B~4~N~","BC","Dust","Seasalt","CO_biomass","CO_NAm","CO_EU","CO_NAf","CO_WAs","CO_EAs","CO_SAm","CO_SAf","CO_Aus","PM25"/)
+ spec_col        = (/        "",  "",         "",  "AODVISdn","",                   "",         "",  "",    "",       "","","","","","","","","","",""/)
+ spec_stratcol   = (/        "",  "",         "","AODVISstdn","",                   "",         "",  "",    "",       "","","","","","","","","","",""/)
+ spec_n_col      = (/"O~B~3~N~","CO","NO~B~x~N~",       "AOD","",                   "",         "",  "",    "",       "","","","","","","","","","",""/)
+ specLogContours = (/False, False, False, True, False, False, True, True, True, True,False, False, False,False, False, False,False, False, False,False/)
+ spec_comb = (/False, False, True, False, False, False, True, True, True, True,False, False, False,False, False, False,False, False, False,False/)
  nSpec=dimsizes(spec)
 
  infile = systemfunc("ls -1 "+dir_output+case_name+".cam.h0.*nc")
@@ -138,6 +141,12 @@ begin
      fact_sp   = (/0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5/)
      offset_sp = (/0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001/)
     end if
+    if spec(sp).eq."PM25_SRF" then
+     factor_sp = (/1.e+09,1.e+09,1.e+06,1.e+06,1.e+06,1.e+06,1.e+06,1.e+06,1.e+06,1.e+06/)
+     units_sp = (/"~F33~m~F25~g/m~S~3~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~","10~S~-9~N~ g/m~S~2~N~"/)
+     fact_sp   = (/5.0,1.,1.,1.,1.,1.,1.,1.,1.,1./)
+     offset_sp = (/0.0,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00/)
+    end if
     if spec_comb(sp) then
      if spec(sp).eq."BC" then
       sp1= f1->bc_a4
@@ -182,19 +191,23 @@ begin
    if sp.gt.9 then
       nSurfaces = 3
    end if 
-    do srf = 0,nSurfaces-1
+   if spec(sp).eq."PM25_SRF" then 
+        nSurfaces=1
+   end if
+   do srf = 0,nSurfaces-1
      ;print(spec(sp)+" "+srf_n(srf))
    ; interpolate to surface
      if (srf_press(srf).eq.1000) then 
+      if spec(sp).ne."PM25_SRF" then 
        sp1_srf = sp1(:,nlev-1,:,:)
+      else
+       sp1_srf = sp1(:,:,:)
+      end if
      end if
      if (srf_press(srf).gt.0 .and. srf_press(srf).lt.1000) then
        sp_int =  int2p_n_Wrap(press,sp1,srf_press(srf),2,1)
        sp1_srf = sp_int(:,0,:,:) 
        delete(sp_int)
-;       print(press(0,:,30,30))
-;       print(max(sp1_srf))
-;       print(min(sp1_srf)) 
      end if
      
      if srf_press(srf).eq.0 then 
@@ -244,6 +257,7 @@ begin
 
 ; plot each 4 dates
       do nd=0,ndate-1
+      
       region = (/"","SH","NH","US"/)
       ;max_lat= (/90.,-30.,90.,56./)
       ;min_lat= (/-90.,-90.,30.,20./)
@@ -257,6 +271,10 @@ begin
      else
       nre = 3
      end if
+     if sp.eq.nSpec-1 then
+      nre = 3
+     end if
+
 
       do re=0,nre
 
@@ -338,6 +356,8 @@ begin
         if re.eq.0 .or. re.eq.3 then
           plot = gsn_csm_contour_map(wks,sp1_srf(nd,:,:),res)
         else
+          delete(res@mpMaxLonF)
+          delete(res@mpMinLonF)
           res@gsnPolar = region(re)
           plot = gsn_csm_contour_map_polar(wks,sp1_srf(nd,:,:),res)
         end if
@@ -348,6 +368,10 @@ begin
        delete(plot)
        delete(con)
        delete(res)
+      ; trim plot
+       command =  "convert -trim -border 8 -bordercolor white +repage "+plotname+".png "+plotname+".png"
+       print((/command/))
+       system(command)
       end do ; region
      end do ; ndate
      delete(sp1_srf)

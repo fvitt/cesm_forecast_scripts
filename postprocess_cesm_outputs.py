@@ -25,10 +25,6 @@ def make_plots():
     output = check_output(cmd, shell=True)
     print output
 
-#    stat = os.system(cmd)
-#    print 'call stat:', stat
-#
-#    if not stat == 0 : return False
     cmd = 'touch '+ plots_dir+'/.ready_for_xfer'
     print cmd
     stat = os.system(cmd)
@@ -135,6 +131,7 @@ def save_output(restart_yyyymmdd):
 print "Begin post-processing ..."
 success = True
 
+days_back=60
 today = datetime.now()
 oneday = timedelta(days=1)
 found=False
@@ -163,11 +160,23 @@ if (success):
     success = make_plots()
 print '   make_plots success : ',success
 
-#if (success): 
-#    success = submit_export_job()
-#print ' submit export job success : ',success
-
 print ' post-process success : ',success
+print ' '
+print '********************************************************************'
+print 'Clean out old files : '
+
+# remove old forecast files :
+if (success):
+    for i in range(days_back,3,-1):
+        yyyymmdd = (today-i*oneday).strftime("%Y%m%d")
+        output_arc = met_root_dir+'/'+yyyymmdd+'/model_files'
+        if (os.path.exists(output_arc+'/.ready_for_xfer')):
+            cmd = 'rm -fr '+met_root_dir+'/*'+yyyymmdd +'*'
+            print ' cmd = '+cmd
+            stat = os.system(cmd)
+            cmd = 'rm '+met_root_dir+'/.last*'+yyyymmdd +'*'
+            print ' cmd = '+cmd
+            stat = os.system(cmd)
 
 print 'post-processing done'
 

@@ -8,8 +8,7 @@ def export_plots():
     yyyymmdd = date.strftime("%Y%m%d")
     plots_dir = met_root_dir+'/'+yyyymmdd+'/plots'
 
-    species = ['BC','CLOX','CO','CO01','CO02','CO03','CO04','CO05','CO06','CO07','CO08','CO09','DUST','EXTINCTdn','NOX','O3','SO2','SO4','SSALT']
-#    basedir = 'nitrogen.acom.ucar.edu:/ur/fvitt/waccm_forecast_output/'
+    species = ['BC','CLOX','CO','CO01','CO02','CO03','CO04','CO05','CO06','CO07','CO08','CO09','DUST','EXTINCTdn','NOX','O3','SO2','SO4','SSALT','PM25_SRF']
     basedir = '128.117.136.211:/ur/waccm_forecast_output/'
     for sp in species:
         cmd = 'scp '+plots_dir+'/'+cesm_case+'*_'+sp+'_*' +' '+basedir+sp+'_plots'

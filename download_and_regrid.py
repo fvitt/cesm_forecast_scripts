@@ -93,17 +93,6 @@ if (not path.exists(filepath)) :
     print "***********************************************"    
     success = dwnld_proc_fcst_met( today, nfc_days )
 
-# remove old forecast files :
-for i in range(days_back,3,-1):
-    yyyymmdd = (today-i*oneday).strftime("%Y%m%d")
-    cmd = 'rm -fr '+rootdir+'/*'+yyyymmdd +'*'
-    print ' cmd = '+cmd
-    stat = system(cmd)
-    cmd = 'rm '+rootdir+'/.last*'+yyyymmdd +'*'
-    print ' cmd = '+cmd
-    stat = system(cmd)
-
-
 # update emissions
 esuccess=False
 for x in range(days_back,0,-1):
