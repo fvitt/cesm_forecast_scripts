@@ -3,10 +3,9 @@
 #SBATCH -J xfer_history_files
 #SBATCH -o xfer_history_files.out.%J
 #SBATCH -e xfer_history_files.out.%J
-#SBATCH -C caldera
 #SBATCH --account=P19010000
 #SBATCH -N 1
-#SBATCH -t 00:50:00
+#SBATCH -t 01:50:00
 #SBATCH -p dav
 
 date

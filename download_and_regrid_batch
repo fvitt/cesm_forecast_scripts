@@ -12,7 +12,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH -t 04:00:00
 #SBATCH -p dav
-#SBATCH -C caldera|pronghorn
+#SBATCH -C skylake
 #SBATCH -o dwnld_proc_frcst.out.%J
 #SBATCH -e dwnld_proc_frcst.out.%J
 #SBATCH --account=P19010000

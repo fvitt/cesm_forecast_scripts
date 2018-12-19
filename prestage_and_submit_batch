@@ -50,9 +50,15 @@ else
 
   echo "Error: File $file does NOT exist.  Try next hour..."
   hour=`date +%H`
-  nexthr=$(expr $hour + 1)
+  if [ $hour -lt 9 ]
+  then
+    nexthr=0$(expr $hour + 1)
+  else
+    nexthr=$(expr $hour + 1)
+  fi
   echo "qsub -a ${nexthr}00 prestage_and_submit_batch"
   qsub -a ${nexthr}00 prestage_and_submit_batch
+
 fi
   
 

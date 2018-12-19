@@ -5,9 +5,9 @@
 #SBATCH -N 1
 #SBATCH -t 00:30:00
 #SBATCH -p dav
-#SBATCH -C caldera|pronghorn
-#SBATCH -o geos5_regrid.out.%J
-#SBATCH -e geos5_regrid.out.%J
+#SBATCH -C skylake
+#SBATCH -o compile_test.out.%J
+#SBATCH -e compile_test.out.%J
 #SBATCH --account=P19010000
 #SBATCH --mem 50G
 
@@ -21,6 +21,6 @@ module list
 rm regrid_met
 ifort -O2 regrid_meteorology.f90 -o regrid_met
 
-./regrid_met -infile /glade/scratch/fvitt/GEOS/Y2018/M06/D23/GEOS5_orig_res_20180623.nc -outfile  /glade/scratch/fvitt/GEOS5_test_144x96.nc -nlons 144 -nlats 96
+./regrid_met -infile /glade/scratch/fvitt/GEOS/Y2018/M12/D10/GEOS5_orig_res_20181210.nc -outfile  /glade/scratch/fvitt/GEOS5_test_144x96.nc -nlons 144 -nlats 96
 
 exit 0
