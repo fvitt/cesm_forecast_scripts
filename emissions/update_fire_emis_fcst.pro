@@ -18,7 +18,7 @@ for ispec = 0,n_elements(specs)-1 do begin
     spec = specs[ispec]
 
     ;open existing emissions file and update bb emis with nrt
-    emisfile = path_emis+'emissions-fcst_'+spec+'_bb_surface_2017-2018_'+resol+'.nc'
+    emisfile = path_emis+'emissions-fcst_'+spec+'_bb_surface_2018-2020_'+resol+'.nc'
     print,emisfile
     ncide = ncdf_open(emisfile,/write)
     ncdf_varget,ncide,'date',date_emis

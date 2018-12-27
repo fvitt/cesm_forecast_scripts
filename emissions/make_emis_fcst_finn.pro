@@ -13,7 +13,7 @@ path_out = '/glade/p/work/emmons/emis/fcst_2017/'
 ;make new time array - daily - gregorian calendar, days since 1750
 day1 = Julday(1,1,2017)
 day2 = Julday(1,1,2019)
-yrstr = '2017-2018'
+yrstr = '2018-2020'
 ntim = day2-day1+1
 time = fltarr(ntim)
 date = lonarr(ntim)
