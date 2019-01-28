@@ -20,7 +20,7 @@
 
 #module purge
 module list
-module load python
+module load python/2.7.15
 module load slurm
 module load ncarenv
 module load idl

@@ -17,7 +17,7 @@ module list
 module load slurm
 module load ncarenv
 module load intel
-module load python
+module load python/2.7.15
 module load ncl
 module list
 

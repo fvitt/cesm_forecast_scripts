@@ -23,7 +23,7 @@ mkdir -p $TMPDIR
 module purge
 module list
 module load ncarenv
-module load python
+module load python/2.7.15
 module list
 
 echo "Begin Post-Processing Job"
